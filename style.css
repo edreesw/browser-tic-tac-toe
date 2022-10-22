@@ -25,3 +25,74 @@ footer {
     padding: 10px; 
     text-align: center;
 }
+
+.main-container {
+    display: flex; 
+    flex-direction: column;
+    gap: 30px; 
+    justify-content: center;
+    align-items: center;
+}
+
+/** game grid **/ 
+
+.game-grid {
+    width: 450px;
+    height: 450px;
+
+    background-color: black;
+    display: grid; 
+    gap:2px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+
+    padding: 4px; 
+}
+@media (max-width: 700px) {
+    .game-grid {
+        width: 350px;
+        height: 350px;
+    }
+  }
+
+.game-grid .grid-cell {
+    background-color: lightblue;
+    min-height: 50px;
+    width: auto;
+
+    font-size: 60px;
+    font-weight: bolder;
+
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+}
+
+/** player info section **/ 
+.reset {
+    background-color: lightblue;
+    padding: 8px 16px;
+    font-size: 24px;
+    font-weight: bold;
+    border-width: 1px;
+    border-radius: 8px;
+}
+
+.reset:hover {
+    background-color: lightsteelblue;
+}
+.reset:active {
+    background-color: lightseagreen;
+}
+
+.game-info-container {
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; 
+}
+
+.player-info-text {
+    font-size: 36px;
+    text-align: center;
+}
