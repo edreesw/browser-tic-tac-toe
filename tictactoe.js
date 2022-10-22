@@ -1,10 +1,3 @@
-const playerOne = "X"; 
-const playerTwo = "O";
-let playerOneTurn = true;   
-const gridCells = document.querySelectorAll(".grid-cell"); 
-const resetButton = document.querySelector(".reset");
-
-
 const gameBoard = ( () => {
     let gameStatus = true; 
     const board = ["", "", "", "", "", "", "", "", ""]; 
@@ -18,15 +11,21 @@ const gameBoard = ( () => {
         [0, 4, 8],
         [2, 4, 6],
     ];
+    const playerOne = "X"; 
+    const playerTwo = "O";
+    let playerOneTurn = true;  
+    
     const reset = () => {
         gameStatus = true; 
+        playerOneTurn = true; 
         for(let i = 0; i < board.length; i++) {
             board[i] = ""; 
         }
     }
-    const checkWin = (curPlayer) => {
+    const checkWin = () => {
         //check win for current player
         //if win is found, mark board invalid and return true, otherwise false
+        let curPlayer = playerOneTurn ? playerOne : playerTwo;
         for(let i = 0; i < winningBoards.length; i++) {
             if(board[winningBoards[i][0]] === board[winningBoards[i][1]] &&
                 board[winningBoards[i][0]] === board[winningBoards[i][2]] &&
@@ -49,12 +48,12 @@ const gameBoard = ( () => {
         gameStatus = false; 
         return true; 
     }
-    const recordMove = (player, gridIndex) => {
+    const recordMove = (gridIndex) => {
         if(board[gridIndex] != "") {
             console.log("grid cell already has player icon, exiting board.recordMove()"); 
             return false; 
         }
-        board[gridIndex] = player; 
+        board[gridIndex] = playerOneTurn ? playerOne : playerTwo; 
         return true;  
     }
     const isGameValid = () => {
@@ -63,28 +62,32 @@ const gameBoard = ( () => {
     const getBoardArray = () => {
         return board.slice(); //return clone of array 
     }
-    return {reset, checkWin, checkDraw, recordMove, isGameValid, getBoardArray}
+    const curPlayer = () => {
+        return playerOneTurn ? playerOne : playerTwo; 
+    }
+    const switchPlayerTurn = () => {
+        playerOneTurn = !playerOneTurn; 
+    }
+    return {reset, checkWin, checkDraw, recordMove, isGameValid, getBoardArray, curPlayer, switchPlayerTurn}
 })(); 
 
 const displayController = ( () => {
     let gridCells = document.querySelectorAll(".grid-cell");
     const playerText = document.querySelector(".player-info-text"); 
 
-    const renderBoard = (board) => {
-        for(let i = 0; i < board.length; i++) {
-            gridCells[i].textContent = board[i]; 
+    const renderBoard = (boardArray) => {
+        for(let i = 0; i < boardArray.length; i++) {
+            gridCells[i].textContent = boardArray[i]; 
         }
     }
 
-    const playerMoveText = (playerTurn) => {
+    const playerMoveText = (curPlayer) => {
         //use current player to post player turn text
-        let playerName = playerTurn ? "Player 1" : "Player 2"; 
-        playerText.textContent = playerName + ", make your move!"; 
+        playerText.textContent = curPlayer + ", make your move!"; 
     }
 
-    const winnerText = (playerTurn) => {
-        let playerName = playerTurn ? "Player 1" : "Player 2"; 
-        playerText.textContent = playerName + " wins!"; 
+    const winnerText = (curPlayer) => {
+        playerText.textContent = curPlayer + " wins!"; 
     }
 
     const drawText = () => {
@@ -94,18 +97,18 @@ const displayController = ( () => {
     return {renderBoard, playerMoveText, winnerText, drawText}
 })(); 
 
+
+
 function playerMove(e) {
     console.log("player move func"); 
     //console.log(e.target.getAttribute("data-index"))
 
     let gridCellIndex = parseInt(e.target.getAttribute("data-index")); 
 
-    let curPlayer = playerOneTurn ? playerOne : playerTwo; 
-
     //record move on board object
     //verify that the grid isn't already filled out with a move
     //enter correct player icon onto the correct grid element
-    if(!gameBoard.isGameValid() || !gameBoard.recordMove(curPlayer, gridCellIndex)) {
+    if(!gameBoard.isGameValid() || !gameBoard.recordMove(gridCellIndex)) {
         console.log("Game is over/invalid or user just tried to click an already marked cell, exiting playerMove func"); 
         return; 
     }
@@ -114,9 +117,9 @@ function playerMove(e) {
     displayController.renderBoard(gameBoard.getBoardArray()); 
 
     //check for a win or draw, if found enter win message and lock the game board somehow until reset
-    if(gameBoard.checkWin(curPlayer)) {
+    if(gameBoard.checkWin()) {
         //enter win message
-        displayController.winnerText(playerOneTurn); 
+        displayController.winnerText(gameBoard.curPlayer()); 
         return; 
     } else if(gameBoard.checkDraw()) {
         //enter draw message
@@ -124,22 +127,23 @@ function playerMove(e) {
         return; 
     }
 
-    playerOneTurn = !playerOneTurn; //change player turns
-    displayController.playerMoveText(playerOneTurn); 
+    gameBoard.switchPlayerTurn(); //change player turns
+    displayController.playerMoveText(gameBoard.curPlayer()); 
 }
 
 function resetBoard(e) {
     console.log("in resetBoard()");
     //reset the board object
     gameBoard.reset(); 
-    //reset player variable
-    playerOneTurn = true; 
     //render the new board and player info section
     displayController.renderBoard(gameBoard.getBoardArray());
-    displayController.playerMoveText(playerOneTurn); 
+    displayController.playerMoveText(gameBoard.curPlayer()); 
 }
 
 
+
+const gridCells = document.querySelectorAll(".grid-cell"); 
+const resetButton = document.querySelector(".reset");
 
 gridCells.forEach((cell) => {
     cell.addEventListener("click", playerMove);
